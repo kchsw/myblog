@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>管理中心</title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+			text-decoration: none;
+		}
+		.edit{
+			width: 60%;
+			margin: 0 auto;
+			text-align: center;
+		}
+
+
+		table,table tr th, table tr td {
+		    border:1px solid #a8aeb2;
+		    padding: 5px 10px;
+		}
+		table {
+		    /*min-height: 25px;
+		    line-height: 25px;*/
+		    text-align: center;
+		    border-collapse: collapse;
+		    margin: 20px auto;
+		}
+
+	</style>
+	<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+</head>
+<body>
+	<div class="edit">
+		<h1>管理中心</h1>
+		<p>
+			<a href="#">新建博客</a>
+		</p>
+		<div>
+			<input type="text" id="text-keyword">
+			<button id="btn-search">搜索</button>
+		</div>
+		<table id="table-container">
+			<tr>
+				<th style="width: 300px">博客标题</th>
+				<th colspan="2">操作</th>
+			</tr>
+			<!-- <tr>
+				<td>标题1</td>
+				<td>编辑</td>
+				<td>删除</td>
+			</tr> -->
+		</table>
+	</div>
+
+	<script>
+		//发送get 请求
+		function get(url){
+			return $.get(url)
+		}
+
+		//发送post请求
+		function post(url, data = {}){
+			return $.ajax({
+				type: 'POST',
+				url,
+				data: JSON.stringify(data),
+				contentType: 'application/json'
+			})
+		}
+
+		//获取url参数
+		function getUrlParams(){
+			let paramStr = location.href.split('?')[1] || ''
+			paramStr = paramStr.split('#')[0]
+			const result = {}
+			if(paramStr){
+				paramStr.split('&').forEach(item => {
+					const arr = item.split('=')
+					const key = arr[0]
+					const val = arr[1]
+					result[key] = val
+				})
+			}
+			return result
+		}
+
+		//获取dom元素
+		const $textKeyword = $('#text-keyword')
+		const $btnSearch = $('#btn-search')
+		const $tableContainer = $('#table-container')
+
+		//拼接接口url
+		let url = '/api/blog/list?isadmin=1' //验证及显示自己的博客
+		const urlParams = getUrlParams()
+		if(urlParams.keyword){
+			url += '&keyword=' + urlParams.keyword
+		}
+
+		//加载数据
+		get(url).then(res => {
+			console.log(url)
+			if(res.errno !== 0){
+				alert('数据错误')
+				return 
+			}
+			const data = res.data || []
+			console.log(data)
+			data.forEach(item => {
+				$tableContainer.append($(
+					`
+						<tr>
+							<td>${item.title}</td>
+							<td>编辑</td>
+							<td>删除</td>
+						</tr>
+					`
+				))
+			})
+		})
+
+		//搜索
+		$('#btn-search').click(
+			function(){
+				let keyword = $('#text-keyword').val()
+				if(keyword){
+					window.location.href = `/edit.html?keyword=${keyword}`
+				}				
+			}
+		)
+	</script>
+</body>
+</html>

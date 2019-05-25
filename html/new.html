@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>新建博客</title>
+	<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+	<style>
+		.new{
+			width: 60%;
+			margin: 0 auto;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<div class="new">
+		<h1>新建博客</h1>
+		<label>标题 </label>
+		<input type="text" id="new-title">
+		</br>
+		<label style="margin-top: 10px">内容</label>
+		<textarea rows="10" cols="50" id="new-content"></textarea>
+		<button id="new-blog">新建</button>
+	</div>
+
+	<script>
+		//发送post请求
+		function post(url, data = {}){
+			return $.ajax({
+				type: 'POST',
+				url,
+				data: JSON.stringify(data),
+				contentType: 'application/json'
+			})
+		}
+		//获取dom元素
+		const $newTitle = $('#new-title')
+		const $newContent = $('#new-content')
+		const $newBlog = $('#new-blog')
+
+		const url = '/api/blog/new'
+		let data = {}
+		function newblog(){
+			let title = $newTitle.val()
+			let content = $newContent.val()
+			if(title && content){
+				data = {
+					title,
+					content
+				}
+				console.log(data)
+				post(url,data).then(res => {
+					console.log(res)
+					if(res.errno !== -1){
+						window.location.href="/index.html"						
+					}else{
+						alert('登陆失败')
+					}
+				})
+			}else{
+				alert('标题或内容不能为空')
+			}
+		}
+		$newBlog.click(
+			newblog
+		)
+
+	</script>
+</body>
+</html>

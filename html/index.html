@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>首页</title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+			text-decoration: none;
+		}
+		.index{
+			width: 60%;
+			margin: 0 auto;
+		}
+		.index h1{
+			text-align: center;
+		}
+		.blog-item{
+			margin: 10px 0;
+			padding: 10px;
+			box-sizing: border-box;
+			border-radius: 5px;
+			border: 1px solid #ccc;
+			box-shadow:2px 2px 3px #aaaaaa;
+		}
+		.title{
+			padding: 5px 0;
+		}
+		.title a{
+			font-size: 20px;
+			color: #000;
+		}
+		.info,.author a{
+			color: #666;
+		}
+		.author{
+			margin-right: 10px;
+		}
+	</style>
+	<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+	<script src="https://cdn.bootcss.com/moment.js/2.24.0/moment.min.js"></script>
+	<script src="https://cdn.bootcss.com/moment.js/2.24.0/locale/zh-cn.js"></script>
+</head>
+<body>
+	<div class="index">
+		<h1>博客列表</h1>
+		<div id="blog-container">
+			<!-- <div class="blog-item">
+				<p class="title">
+					<a href="#" target="_blank">我是标题</a>
+				</p>
+				<div class="info">
+					<span class="author"><a href="#">我是作者</a></span>
+					<span >我是日期</span>
+				</div>
+			</div> -->
+		</div>
+	</div>
+	<script>
+		//发送get 请求
+		function get(url){
+			return $.get(url)
+		}
+		//显示格式化的时间
+		function getFormatData(dt){
+			return moment(dt).format('LL')
+		}
+		//获取url参数
+		function getUrlParams(){
+			let paramStr = location.href.split('?')[1] || ''
+			paramStr = paramStr.split('#')[0]
+			const result = {}
+			if(paramStr){
+				paramStr.split('&').forEach(item => {
+					const arr = item.split('=')
+					const key = arr[0]
+					const val = arr[1]
+					result[key] = val
+				})
+			}
+			return result
+		}
+
+		//获取dom元素
+		const $container = $('#blog-container')
+
+		//拼接接口 url
+		let url = '/api/blog/list'
+		const urlParams = getUrlParams()
+		console.log(urlParams)
+		if(urlParams.author){
+			url += '?author=' + urlParams.author 
+		}
+		console.log(url)
+		//加载数据
+		get(url).then(res => {
+			if(res.errno !==0){
+				alert('数据错误')
+				return
+			}
+
+			//遍历博客列表， 并显示
+			const data = res.data || []
+			console.log(data)
+			data.forEach(item => {
+				$container.append($(
+					`
+					<div id="blog-container">
+						<div class="blog-item">
+							<p class="title">
+								<a href="/detail.html?id=${item.id}" target="_blank">${item.title}</a>
+							</p>
+							<div class="info">
+								<span class="author"><a href="/index.html?author=${item.author}">${item.author}</a></span>
+								<span>${getFormatData(item.createtime)}</span>
+							</div>
+						</div>
+					</div>
+					`
+				))
+			})
+		})
+	</script>
+</body>
+</html>

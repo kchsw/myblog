@@ -1,6 +1,8 @@
 const handleBlogRouter = require('./src/router/blog')
 const handleUserRouter = require('./src/router/user')
 const querystring = require('querystring')
+const { get, set } = require('./src/db/redis')
+const { access } = require('./src/utils/log')
 //mysql pw #2/aa<aB<Swey
 //设置cookie过期时间 
 const getCookieExpires = () => {
@@ -36,8 +38,11 @@ const getPostData = req => {
 }
 
 //session 数据
-const SESSION_DATA = {}
+// const SESSION_DATA = {}
 const serverHandle = (req, res) => {
+
+	//写access日志
+	access(`${req.method} -- ${req.url} -- ${req.headers['user-agent']} -- ${Date.now()}`)
     
 	//设置返回格式 JSON
 	res.setHeader('Content-type', 'application/json')
@@ -72,21 +77,43 @@ const serverHandle = (req, res) => {
 	console.log('cookie is' + JSON.stringify(req.cookie))
 
 	//解析session
+	// let needSetCookie = false
+	// let userId = req.cookie.userid
+	// if(userId){
+	// 	if(!SESSION_DATA[userId]){
+	// 		SESSION_DATA[userId] = {}
+	// 	}	
+	// }else{
+	// 	//第一次登陆的情况
+	// 	userId = `${Date.now()}_${Math.random()}`
+	// 	SESSION_DATA[userId] = {}
+	// 	needSetCookie = true
+	// }
+	// req.session = SESSION_DATA[userId]
+	//处理post Data成功
+
+	//使用redis解析session
 	let needSetCookie = false
 	let userId = req.cookie.userid
-	if(userId){
-		if(!SESSION_DATA[userId]){
-			SESSION_DATA[userId] = {}
-		}	
-	}else{
-		//第一次登陆的情况
-		userId = `${Date.now()}_${Math.random()}`
-		SESSION_DATA[userId] = {}
+	if(!userId){ //第一次登陆
 		needSetCookie = true
+		userId = `${Date.now()}_${Math.random()}`
+		//初始化session
+		set(userId, {})
 	}
-	req.session = SESSION_DATA[userId]
-	//处理post Data成功
-    getPostData(req).then(postData => {
+	//获取session
+	req.sessionId = userId
+	get(req.sessionId).then(sessionData => {
+		if(sessionData == null){
+			set(req.sessionId, {})
+			req.session = {}
+		}else{
+			req.session = sessionData
+		}
+		console.log('req.session is' + JSON.stringify(req.session))
+		//处理PostData
+	 	return getPostData(req)
+	}).then(postData => {
     	req.body = postData
 	    //处理 blog 路由
 		// const blogData = handleBlogRouter(req, res)

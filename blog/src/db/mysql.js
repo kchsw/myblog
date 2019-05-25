@@ -24,7 +24,8 @@ function exec(sql){
 }
 
 module.exports = {
-	exec
+	exec,
+	escape: mysql.escape
 }
 // const sql = 'select * from users;'
 

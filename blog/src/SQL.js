@@ -19,3 +19,7 @@
 -- select * from blogs
 -- select * from blogs order by createtime desc;
 -- select * from blogs where author="nmsl" order by createtime desc;
+
+
+redis-server.exe redis.windows.conf
+redis-cli.exe
