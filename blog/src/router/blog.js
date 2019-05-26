@@ -88,7 +88,7 @@ const handleBlogRouter = (req, res) => {
 			return checkResult
 		}
 
-		req.body.author = req.session.username
+		const author = req.session.username
 		const result = deleteBlog(id, author)
 		return result.then(val => {
 			return val ? new SuccessModel('删除博客成功') : new ErrorModel('删除博客失败')

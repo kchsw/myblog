@@ -113,7 +113,7 @@
 						<tr>
 							<td>${item.title}</td>
 							<td>编辑</td>
-							<td>删除</td>
+							<td onclick="deleteBlog(${item.id})">删除</td>
 						</tr>
 					`
 				))
@@ -129,6 +129,18 @@
 				}				
 			}
 		)
+
+		function deleteBlog(id){
+			let url = `/api/blog/del?id=${id}`
+			console.log(url)
+			post(url).then(res => {
+				console.log(res)
+				if(res.errno === 0){
+					alert('删除成功')
+					window.location.reload()
+				}
+			})
+		}
 	</script>
 </body>
 </html>
